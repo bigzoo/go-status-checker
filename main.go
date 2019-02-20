@@ -8,10 +8,11 @@ import (
 func checkStatus(link string, c chan string) {
 	res, _ := http.Get(link)
 	if res.Status == "200 OK"{
-		c <- link+ " is ok."
-		return
+		fmt.Println(link, "is ok.")
+	}else {
+		fmt.Println(link, "is down.")
 	}
-	c <-link+ " is down."
+	c <- link
 }
 
 func main()  {
@@ -29,7 +30,7 @@ func main()  {
 	for _, link := range urls{
 		go checkStatus(link, c)
 	}
-	for i := 0; i <len(urls); i++{
-		fmt.Println(<-c)
+	for l := range c {
+		go checkStatus(l, c)
 	}
 }
