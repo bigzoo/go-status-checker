@@ -3,14 +3,15 @@ package main
 import (
 	"fmt"
 	"net/http"
+	"time"
 )
 
 func checkStatus(link string, c chan string) {
-	res, _ := http.Get(link)
-	if res.Status == "200 OK"{
-		fmt.Println(link, "is ok.")
-	}else {
+	res, err := http.Get(link)
+	if err != nil || res.Status != "200 OK"{
 		fmt.Println(link, "is down.")
+	}else {
+		fmt.Println(link, "is ok.")
 	}
 	c <- link
 }
@@ -31,6 +32,9 @@ func main()  {
 		go checkStatus(link, c)
 	}
 	for l := range c {
-		go checkStatus(l, c)
+		go func(link string){
+			time.Sleep(5 * time.Second)
+			checkStatus(link, c)
+		}(l)
 	}
 }
