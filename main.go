@@ -5,32 +5,31 @@ import (
 	"net/http"
 )
 
-func checkStatus(link string) bool {
-	res, err := http.Get(link)
-	if err != nil {
-		return false
-	}
+func checkStatus(link string, c chan string) {
+	res, _ := http.Get(link)
 	if res.Status == "200 OK"{
-		return true
+		c <- link+ " is ok."
+		return
 	}
-	return false
+	c <-link+ " is down."
 }
 
 func main()  {
 	urls := []string{
-		"http://vof-sandbox.andela.com",
-		"http://mail.google.com",
+		"http://bigzoo.me",
+		"http://google.com",
+		"http://vof.andela.com",
 		"http://facebook.com",
 		"http://stackoverflow.com",
 		"http://golang.org",
 		"http://amazon.com",
 	}
+	c := make(chan string)
 
 	for _, link := range urls{
-		if checkStatus(link){
-			fmt.Println(link, "is ok.")
-		}else {
-			fmt.Println(link, "is down.")
-		}
+		go checkStatus(link, c)
+	}
+	for i := 0; i <len(urls); i++{
+		fmt.Println(<-c)
 	}
 }
